@@ -62,3 +62,12 @@ python3 main.py
 ## 效果图
 
 ![效果图](./doc/demo.png)
+
+## 参考链接
+
++ [Telegram Bot API 说明](https://core.telegram.org/bots/api)
++ [Python Qbittorrent 接口文档](https://python-qbittorrent.readthedocs.io/en/latest/modules/api.html)
++ [Qbittorrent 官方 API 文档](https://github.com/qbittorrent/qBittorrent/wiki/)
++ [Telegram 机器人的申请和设置图文教程](https://www.dengnz.com/2020/11/23/telegram-%E6%9C%BA%E5%99%A8%E4%BA%BA%E7%9A%84%E7%94%B3%E8%AF%B7%E5%92%8C%E8%AE%BE%E7%BD%AE%E5%9B%BE%E6%96%87%E6%95%99%E7%A8%8B/)
++ [Telegram Bot 第一个回声机器人 – 你是汤姆猫吧[第二集]](https://www.dengnz.com/2018/09/05/telegram-bot-%e7%ac%ac%e4%b8%80%e4%b8%aa%e5%9b%9e%e5%a3%b0%e6%9c%ba%e5%99%a8%e4%ba%ba-%e4%bd%a0%e6%98%af%e6%b1%a4%e5%a7%86%e7%8c%ab%e5%90%a7%e7%ac%ac%e4%ba%8c%e9%9b%86/)
++ [TMDB API 说明文档](https://developer.themoviedb.org/reference/intro/getting-started)
