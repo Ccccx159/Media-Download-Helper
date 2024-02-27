@@ -22,7 +22,7 @@ def send_message(chat_id, text):
         'method': 'sendMessage',
         'chat_id': chat_id,
         'text': text,
-        'parse_mode': 'Markdown',
+        # 'parse_mode': 'Markdown',
     }
     print(payload)
     try:
@@ -43,3 +43,7 @@ def send_photo(chat_id, caption, photo):
     }
     res = requests.post(TG_BOT_URL, json=payload)
     res.raise_for_status()
+
+
+content = 'Constellation.S01E03.Somewhere.in.Space.Hangs.My.Heart.1080p.ATVP.WEB-DL.DDP5.1.H.264-NTb[...'
+send_message('-1001249004735', content)

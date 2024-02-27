@@ -25,14 +25,14 @@ def get_detail_by_tmdb(info):
         return 'Error', None, 'query by tmdb failed'
     tmdb_id = res.json()['results'][0]['id']
     caption = (
-        '#影视更新\n'
-        + '\[{type_ch}]\n'
-        + '片名： *{title}* ({year})\n'
-        + '{episode}'
-        + '评分： {rating}\n\n'
-        + '上映日期： {rel}\n\n'
-        + '内容简介： {intro}\n\n'
-        + '相关链接： [TMDB](https://www.themoviedb.org/{type}/{tmdbid}?language=zh-CN)\n'
+        r'#影视更新\n'
+        + r'\[{type_ch}]\n'
+        + r'片名： *{title}* ({year})\n'
+        + r'{episode}'
+        + r'评分： {rating}\n\n'
+        + r'上映日期： {rel}\n\n'
+        + r'内容简介： {intro}\n\n'
+        + r'相关链接： [TMDB](https://www.themoviedb.org/{type}/{tmdbid}?language=zh-CN)\n'
     )
     if info['type'] == 'movie':
         return get_movie_info(tmdb_id, caption)
