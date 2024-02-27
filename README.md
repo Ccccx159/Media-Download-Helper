@@ -3,7 +3,8 @@
 ## 修订版本
 
 | 修订版本 | 修订日期 | 修订内容 |
-| :------: | :------: | :------: |
+| :------: | :------: | :------ |
+| v1.001.0 | 2024.02.27 | <li>取消sendMessage接口text字段格式为markdown限制，修复部分下载文件名称字符串过长自动省略后不符合markdown规范导致的sendMessage接口返回失败问题</li><li>增加TMDBQuery中caption拼接字符串时‘r’前缀声明，避免在某些版本(例如python3.12)中被默认转义</li><li>新增dockfile和对应的docker-compose.yml，该compose在`Ubuntu 20.04.6 LTS x86_64`环境下测试正常</li> |
 | v1.000.0 | 2024.02.26 | <li>新增项目，完成各模块开发，实现项目功能</li> |
 
 ## 项目简介
@@ -44,6 +45,8 @@
 
 ## 使用说明
 
+### 1. 源码运行
+
 ~~~shell
 
 # 安装额外依赖模块
@@ -57,6 +60,16 @@ export BOT_TOKEN='Your telegram bot token'
 export TMDB_API_TOKEN='Your TMDB API token'
 
 python3 main.py
+~~~
+
+### 2. docker-compose
+
+~~~shell
+# 修改 dockerfile/docker-compose.yml 中的环境变量
+vim dockerfile/docker-compose.yml
+
+# 启动容器
+docker-compose -f dockerfile/docker-compose.yml up -d
 ~~~
 
 ## 效果图

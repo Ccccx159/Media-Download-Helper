@@ -1,0 +1,16 @@
+version: '3'
+services:
+  media_dlhelper:
+    build:
+      context: .
+      dockerfile: dockerfile
+    image: media_dlhelper:latest
+    ports:
+      - '<your host port>:8000'
+    environment:
+      - QBIT_HOST=<your qbittorrent WebUI base API>
+      - QBIT_USER=<your qbittorrent username>
+      - QBIT_PASS=<your qbittorrent password>
+      - BOT_TOKEN=<your telegram bot token>
+      - TMDB_API_TOKEN=<your TMDB API token>
+    network_mode: "bridge"
