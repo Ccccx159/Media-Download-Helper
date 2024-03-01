@@ -2,14 +2,13 @@
 # -*- coding: UTF-8 -*-
 
 import Downloader as dl
-import time, re
-import simple_http_server as http_srv
+import time, re, os, requests, json, urllib3
 from queue import Queue
 from threading import Thread
 import TelegramBot as tgbot
 import TMDBQuery as tmdb
 
-def task_processor(msg_queue, qb):
+def task_customer(msg_queue, qb):
   while True:
     # 获取一个任务
     msg = msg_queue.get()
@@ -54,28 +53,39 @@ def task_processor(msg_queue, qb):
         tgbot.send_message(chat_id=task['chat_id'], text=poster_url)
     msg_queue.task_done()
 
-
+def task_producer(msg_queue):
+  google_apps_script_url = os.getenv('GOOGLE_APPS_SCRIPT_URL')
+  while True:
+    try:
+      res = requests.get(google_apps_script_url, timeout=10, verify=False)
+      res.raise_for_status()
+      if res.json()['status'] == 'OK':
+        magnet_list = res.json()['magnet_urls']
+        for magnet in magnet_list:
+          print(json.loads(magnet['magnet'])['chat_id'])
+          print(json.loads(magnet['magnet'])['url'])
+          msg = {
+            'chat_id': json.loads(magnet['magnet'])['chat_id'],
+            'magnet_url': json.loads(magnet['magnet'])['url']
+          }
+          msg_queue.put(msg)
+    except Exception as e:
+      print(e)
+      time.sleep(60)
+      continue
+    time.sleep(60)
+  return
 
 if __name__ == '__main__':
+  urllib3.disable_warnings()
   msg_queue = Queue()
-  thread_httpd = Thread(target=http_srv.simple_http_server, args=(msg_queue,))
-  thread_httpd.start()
+  thread_producer = Thread(target=task_producer, args=(msg_queue,))
+  thread_producer.start()
 
   # 开启任务处理线程
   my_qb = dl.MyQbittorrent(dl.QBIT_HOST, dl.QBIT_USER, dl.QBIT_PASS)
   for i in range(3 if my_qb.perferences.get('max_active_downloads') == 99 else my_qb.perferences.get('max_active_downloads')):
-    t = Thread(target=task_processor, args=(msg_queue, my_qb))
+    t = Thread(target=task_customer, args=(msg_queue, my_qb))
     t.setDaemon(True)
     t.start()
-
-  while True:
-    if not msg_queue.empty():
-      msg = msg_queue.get()
-      print('chat_id: {}'.format(msg.get('chat_id')))
-      print('magnet_url:{}'.format(msg.get('magnet_url')))
-      time.sleep(5)
-      
-    else:
-      time.sleep(10 * 1 / 1000)
-      
-  thread_httpd.join()
+  thread_producer.join()
