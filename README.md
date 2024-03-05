@@ -74,7 +74,9 @@ docker-compose -f dockerfile/docker-compose.yml up -d
 
 ## 效果图
 
-![效果图](./doc/demo.png)
+![效果图](./doc/demo-suc.png)
+
+![效果图](./doc/demo-fail.png)
 
 ## 参考链接
 
