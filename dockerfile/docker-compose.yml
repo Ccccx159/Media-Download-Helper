@@ -4,9 +4,7 @@ services:
     build:
       context: .
       dockerfile: dockerfile
-    image: media_dlhelper:latest
-    # ports:
-    #   - '<your host port>:8000'
+    image: b1gfac3c4t/media_dlhelper:v2.0.0
     environment:
       - TZ=Asia/Shanghai
       # 这里所有的环境变量都不要使用引号
@@ -16,7 +14,7 @@ services:
       - QBIT_PASS=<your qbittorrent password>
       - BOT_TOKEN=<your telegram bot token>
       - TMDB_API_TOKEN=<your TMDB API token>
-      - GOOGLE_APPS_SCRIPT_URL= <google apps scrip 部署后的原始web应用网址>
+      - GOOGLE_APPS_SCRIPT_URL=<google apps scrip 部署后的原始web应用网址>
       # 可选参数
       - LOG_LEVEL=INFO # [DEBUG, INFO, WARNING] 三个等级，默认 WARNING
       - LOG_EXPORT=False # [True, False0] 是否将日志输出到文件，默认 False
