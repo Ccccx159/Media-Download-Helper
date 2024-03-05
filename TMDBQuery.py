@@ -2,6 +2,7 @@
 # -*- coding: UTF-8 -*-
 
 import requests, json, re, os
+import log
 
 TMDB_API_TOKEN = os.getenv('TMDB_API_TOKEN')
 
@@ -12,6 +13,7 @@ TMDB_API_HEADERS = {
 
 
 def get_detail_by_tmdb(info):
+    log.logger.debug('开始查询 TMDB 获取 {} 媒体信息!'.format(info['name']))
     search_url = (
         "https://api.themoviedb.org/3/search/{}?query={}&language=zh-CN&page=1".format(
             info["type"], info["name"]
@@ -22,17 +24,17 @@ def get_detail_by_tmdb(info):
         res.raise_for_status()
     except:
         raise Exception("query by tmdb failed")
-        return 'Error', None, 'query by tmdb failed'
+        return 'Error', None, '查询 TMDB 失败, 检查网络连接或者 API token 是否正确!'
     tmdb_id = res.json()['results'][0]['id']
     caption = (
-        r'#影视更新\n'
-        + r'\[{type_ch}]\n'
-        + r'片名： *{title}* ({year})\n'
-        + r'{episode}'
-        + r'评分： {rating}\n\n'
-        + r'上映日期： {rel}\n\n'
-        + r'内容简介： {intro}\n\n'
-        + r'相关链接： [TMDB](https://www.themoviedb.org/{type}/{tmdbid}?language=zh-CN)\n'
+        '#影视更新\n'
+        + '\[{type_ch}]\n'
+        + '片名： *{title}* ({year})\n'
+        + '{episode}'
+        + '评分： {rating}\n\n'
+        + '上映日期： {rel}\n\n'
+        + '内容简介： {intro}\n\n'
+        + '相关链接： [TMDB](https://www.themoviedb.org/{type}/{tmdbid}?language=zh-CN)\n'
     )
     if info['type'] == 'movie':
         return get_movie_info(tmdb_id, caption)
@@ -40,13 +42,14 @@ def get_detail_by_tmdb(info):
         info['name'] = res.json()['results'][0]['name']
         return get_tv_info(info, tmdb_id, caption)
     else:
-        return 'Error', None, 'unknown type'
+        return 'Error', None, '下载文件类型未知, 无法从 TMDB 获取信息!'
     
 
 
 def get_movie_info(tmdb_id, caption):
     movie_url = 'https://api.themoviedb.org/3/movie/{}?language=zh-CN'.format(tmdb_id)
     res = requests.get(movie_url, headers=TMDB_API_HEADERS)
+    log.logger.debug(res)
     res.raise_for_status()
     movie_detail = res.json()
     caption = caption.format(
@@ -76,12 +79,14 @@ def get_tv_info(info, tmdb_id, caption):
     # 先查询一次 season 信息,获取 poster_path,因为 episode 信息中没有 poster_path
     tv_url = 'https://api.themoviedb.org/3/tv/{}/season/{}?language=zh-CN'.format(tmdb_id, season[1:])
     res = requests.get(tv_url, headers=TMDB_API_HEADERS)
+    log.logger.debug(res)
     tv_poster_path = res.json()['poster_path']
     # 查询 season 或 episode 信息
     tv_url = 'https://api.themoviedb.org/3/tv/{}{}?language=zh-CN'.format(
         tmdb_id, series
     )
     res = requests.get(tv_url, headers=TMDB_API_HEADERS)
+    log.logger.debug(res)
     res.raise_for_status()
     tv_detail = res.json()
     # print(json.dumps(tv_detail, indent=4))

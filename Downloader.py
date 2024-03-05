@@ -5,6 +5,7 @@ from qbittorrent import Client as QbClient
 from queue import Queue
 import urllib.parse
 import time, os
+import log
 
 # qbittorrent login info
 QBIT_HOST = os.getenv('QBIT_HOST')
@@ -34,16 +35,24 @@ class MyQbittorrent:
   def query_torrent(self, magnet_url):
     tr_lists = self.qb.torrents(sorted='added_on')
     for tr in tr_lists:
-      # print(tr['magnet_uri'])
+      # log.logger.debug(log.SensitiveData('magnet_uri from client: {}'.format(tr['magnet_uri'])))
       if self.__extract_hash_from_magnet(tr['magnet_uri']) == self.__extract_hash_from_magnet(magnet_url):
         return tr
     return None
   
+  def __list_torrents(self):
+    tr_lists = self.qb.torrents(sorted='added_on')
+    for tr in tr_lists:
+      log.logger.debug('name: {}'.format(tr['name']))
+      log.logger.debug(log.mask_sensitive_data('hash: {}, state: {}'.format(tr['hash'], tr['state'])))
+      log.logger.debug('-' * 30)
+    return tr_lists
+  
   def download(self, magnet_url, save_path='/downloads'):
     tr = self.query_torrent(magnet_url)
     if tr is not None:
-      content = 'Torrent {} already exists, please do not download again'.format(tr['name'])
-      # print(content)
+      content = '{} 已存在, 请勿重复下载!'.format(tr['name'])
+      log.logger.debug(content)
       return 'Error', None, content
     else:
       self.qb.download_from_link(magnet_url, save_path=save_path)
@@ -53,7 +62,7 @@ class MyQbittorrent:
         if tr is None:
           time.sleep(5)
           if time.time() - start_time > 60:
-            content = 'Add download task failed! Qbittorrent not response, please check the host is working normally'
+            content = '添加下载任务失败, qBittirrent 无响应, 请检查是否正常运行, 或重启 qBittorrent!'
             return 'Error', None, content
           continue
-        return 'Success', tr, '{} now has started downloading'.format(tr['name'])
+        return 'Success', tr, '{} 已成功开始下载!'.format(tr['name'])

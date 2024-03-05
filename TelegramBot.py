@@ -2,6 +2,7 @@
 # -*- coding: UTF-8 -*-
 
 import requests, json, os
+import log
 
 # 填充电报机器人的token
 TG_BOT_URL = 'https://api.telegram.org/bot%s/' % os.getenv('BOT_TOKEN')
@@ -24,14 +25,14 @@ def send_message(chat_id, text):
         'text': text,
         # 'parse_mode': 'Markdown',
     }
-    print(payload)
+    log.logger.debug(log.SensitiveData(json.dumps(payload).encode('utf-8')))
     try:
       res = requests.post(TG_BOT_URL, json=payload)
       res.raise_for_status()
       # print(res)
     except:
        raise POST_ERR('ERR!!! post caption failed!!!!\n%s' % text)
-    print('send message successfully!')
+    log.logger.debug('send message successfully!')
 
 def send_photo(chat_id, caption, photo):
     payload = {

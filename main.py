@@ -7,6 +7,7 @@ from queue import Queue
 from threading import Thread
 import TelegramBot as tgbot
 import TMDBQuery as tmdb
+import log
 
 def task_customer(msg_queue, qb):
   while True:
@@ -30,19 +31,19 @@ def task_customer(msg_queue, qb):
       task['series'] = s_match.group()
 
     res, tr, content = qb.download(task['magnet_url'])
-    print(content)
     tgbot.send_message(task['chat_id'], content)
     if res =='Success':
       while True:
         tr = qb.query_torrent(task['magnet_url'])
-        # print('time:{}, {}'.format(time.strftime('%Y-%m-%d %H:%M:%S', time.localtime()),time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(tr['added_on']))))
-        # print('name: {}\nhash: {}\nstate: {}'.format(tr['name'], tr['hash'], tr['state']))
-        # print('*' * 30)
+        log.logger.debug('time:{}, {}'.format(time.strftime('%Y-%m-%d %H:%M:%S', time.localtime()),time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(tr['added_on']))))
+        log.logger.debug('name: {}'.format(tr['name']))
+        log.logger.debug('hash: {}, state: {}'.format(log.SensitiveData(tr['hash']), tr['state']))
+        log.logger.debug('- ' * 30)
         if tr['state'] == 'stalledUP' or tr['state'] == 'uploading' or tr['state'] == 'pausedUP':
-          print('{} download Finished!'.format(tr['name']))
+          log.logger.info('{} download Finished!'.format(tr['name']))
           break
         time.sleep(10)
-      content = ('{} download Finished!'.format(task['task_name']))
+      content = ('{} 下载完成!'.format(task['task_name']))
       tgbot.send_message(chat_id=task['chat_id'], text=content)
 
       # get detail info from tmdb and send to user
@@ -58,23 +59,23 @@ def task_producer(msg_queue):
   while True:
     try:
       res = requests.get(google_apps_script_url, timeout=10, verify=False)
+      log.logger.debug(res.json())
       res.raise_for_status()
       if res.json()['status'] == 'OK':
         magnet_list = res.json()['magnet_urls']
         for magnet in magnet_list:
-          print(json.loads(magnet['magnet'])['chat_id'])
-          print(json.loads(magnet['magnet'])['url'])
+          log.logger.debug(log.SensitiveData(str(json.loads(magnet['magnet'])['chat_id'])))
+          log.logger.debug(log.SensitiveData(json.loads(magnet['magnet'])['url']))
           msg = {
             'chat_id': json.loads(magnet['magnet'])['chat_id'],
             'magnet_url': json.loads(magnet['magnet'])['url']
           }
           msg_queue.put(msg)
     except Exception as e:
-      print(e)
+      log.logger.error(e)
       time.sleep(60)
       continue
     time.sleep(60)
-  return
 
 if __name__ == '__main__':
   urllib3.disable_warnings()
