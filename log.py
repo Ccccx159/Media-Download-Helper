@@ -43,30 +43,34 @@ logger = logging.getLogger('my_logger')
 
 # 输出到控制台
 console_handler = logging.StreamHandler()
-# 输出到文件
-# path = "./log"
-# if not os.path.exists(path):
-#     os.makedirs(path)
-'''获取当前年月日作为日志文件名'''
-# fileName = str(datetime.datetime.now().year) + '-' + str(datetime.datetime.now().month) + '-' + str(
-#     datetime.datetime.now().day) + '.log'
-# file_handler = logging.FileHandler(filename=path+'/'+fileName, mode='a', encoding='utf8')
-
 
 '''日志级别设置'''
-#logger控制最低输出什么级别日志(优先级最高)
-logger.setLevel(logging.DEBUG)
-#console_handler设置控制台最低输出级别日志
-console_handler.setLevel(logging.DEBUG)
-#console_handler设置保存到文件最低输出级别日志
-# file_handler.setLevel(logging.INFO)
+log_level = os.getenv('LOG_LEVEL', 'WARNING')
+if log_level in ['DEBUG', 'INFO', 'WARNING']:
+    level = getattr(logging, log_level)
+else:
+    level = getattr(logging, 'WARNING')
 
-# 日志输出格式
-#保存文件的日志格式
-file_formatter = logging.Formatter(
-    fmt='[%(asctime)s] %(filename)s -> %(funcName)s line:%(lineno)d [%(levelname)s] : %(message)s',
-    datefmt='%Y-%m-%d  %H:%M:%S'
-)
+logger.setLevel(level)
+console_handler.setLevel(level)
+
+# 输出到文件
+log_export = os.getenv('LOG_EXPORT', 'False')
+if log_export.lower() == 'true':
+    path = os.getenv('LOG_PATH', '/tmp/media_dlhelper_logs/')
+    os.makedirs(path, exist_ok=True)  # This will create the directory if it does not exist, and do nothing if it does.
+    '''Get the current date as the log file name'''
+    fileName = datetime.datetime.now().strftime('%Y-%m-%d') + '.log'  # Use strftime to format the date
+    file_handler = logging.FileHandler(filename=os.path.join(path, fileName), mode='a', encoding='utf8')
+    # Set the minimum output level of the log saved to the file
+    file_handler.setLevel(level)
+    file_formatter = logging.Formatter(
+        fmt='[%(asctime)s] [%(filename)s|%(funcName)s|%(lineno)d] [%(levelname)s] : %(message)s',
+        datefmt='%Y-%m-%d  %H:%M:%S'
+    )
+    file_handler.setFormatter(file_formatter)
+
+
 #控制台的日志格式
 console_formatter = colorlog.ColoredFormatter(
     #输出那些信息，时间，文件名，函数名等等
@@ -76,16 +80,18 @@ console_formatter = colorlog.ColoredFormatter(
     log_colors=log_colors_config
 )
 console_handler.setFormatter(console_formatter)
-# file_handler.setFormatter(file_formatter)
 
-# 重复日志问题：
-# 这里进行判断，如果logger.handlers列表为空，则添加，否则，直接去写日志，解决重复打印的问题
+# 避免重复添加handler，导致日志重复输出
 if not logger.handlers:
     logger.addHandler(console_handler)
-    # logger.addHandler(file_handler)
+    if log_export.lower() == 'true':
+        logger.addHandler(file_handler)
 
 console_handler.close()
-# file_handler.close()
+if log_export.lower() == 'true':
+    file_handler.close()
+
+
 
 def SensitiveData(s, head=2, tail=4, mask='*****'):
     # 定义可能包含敏感信息的模式

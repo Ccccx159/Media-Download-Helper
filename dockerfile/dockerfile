@@ -9,8 +9,8 @@ RUN set -eux && \
         apk --no-cache update && apk -U --no-cache add git && \
         \
         mkdir -p /usr/src/myapp/ && \
-        git clone https://github.com/Ccccx159/Media-Download-Helper.git /usr/src/myapp/ && \
-        python3 -m pip install --no-cache-dir python-qbittorrent requests -q; 
+        git clone -b v2.0.0 https://github.com/Ccccx159/Media-Download-Helper.git /usr/src/myapp/ && \
+        python3 -m pip install --no-cache-dir python-qbittorrent requests colorlog -q; 
 
 ENTRYPOINT ["python3"]
 CMD ["/usr/src/myapp/main.py"]
