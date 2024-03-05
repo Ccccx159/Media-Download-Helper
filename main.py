@@ -59,10 +59,10 @@ def task_producer(msg_queue):
   while True:
     try:
       res = requests.get(google_apps_script_url, timeout=10, verify=False)
-      log.logger.debug(res.json())
+      log.logger.debug(log.SensitiveData(str(res.json())))
       res.raise_for_status()
       if res.json()['status'] == 'OK':
-        magnet_list = res.json()['magnet_urls']
+        magnet_list = list(res.json()['magnet_urls'])  # Convert magnet_list to a list
         for magnet in magnet_list:
           log.logger.debug(log.SensitiveData(str(json.loads(magnet['magnet'])['chat_id'])))
           log.logger.debug(log.SensitiveData(json.loads(magnet['magnet'])['url']))
